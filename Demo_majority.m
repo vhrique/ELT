@@ -47,7 +47,7 @@ knn3 = @(x, y)fitcknn(x, y, 'NumNeighbors', 3);
 knn5 = @(x, y)fitcknn(x, y, 'NumNeighbors', 5);
 tree = @(x, y)fitctree(x, y);
 
-learners = {linear_svm, gaussian_svm, knn, tree};
+learners = {linear_svm, gaussian_svm, knn1, knn3, knn5, tree};
 
 %% Ensemble
 
