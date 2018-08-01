@@ -1,10 +1,10 @@
-%%  Ensemble Learning Toolbox - Stacking Demo
+%%  Ensemble Learning Toolbox - Majority Voting Demo
 %
 %	A simple stacking ensemble example.
 %
 %--------------------------------------------------------------------------
 %
-%   Version 0.1 - Copyright 2018
+%   Version 0.2 - Copyright 2018
 %
 %       For new releases and bug fixing of this Tool Set please send e-mail
 %       to the authors.
@@ -46,15 +46,13 @@ knn1 = @(x, y)fitcknn(x, y, 'NumNeighbors', 1);
 knn3 = @(x, y)fitcknn(x, y, 'NumNeighbors', 3);
 knn5 = @(x, y)fitcknn(x, y, 'NumNeighbors', 5);
 tree = @(x, y)fitctree(x, y);
-learners = {linear_svm, gaussian_svm, knn1, knn3, knn5, tree};
-
-% Prepare stacker
-%linear_svm = @(x, y)fitcsvm(x, y, 'KernelFunction', 'linear');
 
 %% Ensemble
 
 % Initialize Ensemble
-ens = custom_ensemble(learners, 'stacking', tree);
+ens = custom_ensemble;
+ens.learners = {linear_svm, gaussian_svm, knn1, knn3, knn5, tree};
+ens.stacking_learner = linear_svm; % this implies that stacking is used
 
 % Train Ensemble
 ens = ens.fit(X_train, Y_train);

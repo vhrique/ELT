@@ -4,7 +4,7 @@
 %
 %--------------------------------------------------------------------------
 %
-%   Version 0.1 - Copyright 2018
+%   Version 0.2 - Copyright 2018
 %
 %       For new releases and bug fixing of this Tool Set please send e-mail
 %       to the authors.
@@ -47,12 +47,12 @@ knn3 = @(x, y)fitcknn(x, y, 'NumNeighbors', 3);
 knn5 = @(x, y)fitcknn(x, y, 'NumNeighbors', 5);
 tree = @(x, y)fitctree(x, y);
 
-learners = {linear_svm, gaussian_svm, knn1, knn3, knn5, tree};
-
 %% Ensemble
 
 % Initialize Ensemble
-ens = custom_ensemble(learners);
+ens = custom_ensemble;
+ens.learners = {linear_svm, gaussian_svm, knn1, knn3, knn5, tree};
+ens.stacking_learner = {}; % this implies that majority voting is used
 
 % Train Ensemble
 ens = ens.fit(X_train, Y_train);

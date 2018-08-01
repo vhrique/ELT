@@ -6,7 +6,28 @@ classdef custom_ensemble
 %
 %--------------------------------------------------------------------------
 %
-%   Version 0.1 - Copyright 2018
+%   Properties:
+%       models:
+%           A list of trained models
+%       learners:
+%           A list of function callbacks (Statistics and Machine Learning
+%           Toolbox)
+%       features:
+%           A list of features to be used by each model
+%       stacking_learner:
+%           A function callback (Statistics and Machine Learning Toolbox)
+%
+%   Methods:
+%       custom_ensemble:
+%           Creates an empty ensemble object
+%       fit:
+%           Trains the learners with provided data
+%       predict:
+%           Predicts the output for new data with the ensemble
+%
+%--------------------------------------------------------------------------
+%
+%   Version 0.2 - Copyright 2018
 %
 %       For new releases and bug fixing of this Tool Set please send e-mail
 %       to the authors.
@@ -29,48 +50,17 @@ classdef custom_ensemble
 %
     
     properties
-        models
-        learners
-        features = {}
+
+        models = {} % Trained Models' List
         
-        combination_method = 'majority'
-        stacking_model
-        stacking_learner
+        learners = {} % Learners' List (callbacks)
+        features = {} % Features' List
+        
+        stacking_model = {}
+        stacking_learner = {}
     end
     
     methods
-        
-        % Create object
-        function obj = custom_ensemble(learners, comb, stacker, features)
-            
-            % Sanity check
-            if nargin == 0
-                error('No parameters')
-            end
-            
-            % Initialize learners list
-            if nargin > 0
-                obj.learners = learners;
-            end
-            
-            % Define combination method
-            if nargin > 1
-                obj.combination_method = comb;
-            end
-            
-            % Define stacker learner
-            if nargin > 2
-                obj.stacking_learner = stacker;
-            end
-            
-            % Initialize features list
-            if nargin > 3
-                if length(features) ~= length(obj.learners)
-                    error('Wrong features list size')
-                end                
-                obj.features = features;
-            end
-        end
         
         % Fit ensemble
         function obj = fit(obj, X, Y)
@@ -93,7 +83,7 @@ classdef custom_ensemble
             end
             
             % Fit stacking model
-            if strcmp(obj.combination_method, 'stacking')
+            if ~isempty(obj.stacking_learner)
                 
                 % Predict for all models
                 for i = 1 : length(obj.models)
@@ -119,12 +109,10 @@ classdef custom_ensemble
             end
             
             % Combine predictions
-            switch obj.combination_method
-                case 'majority'
-                    Y = sum(y, 2) >= size(y, 2)/2;
-                    
-                case 'stacking'
-                    Y = predict(obj.stacking_model, (2*y-1));
+            if isempty(obj.stacking_model)
+                Y = sum(y, 2) >= size(y, 2)/2;
+            else
+                Y = predict(obj.stacking_model, (2*y-1));
             end
         end
     end
