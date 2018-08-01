@@ -1,10 +1,10 @@
-%%  Ensemble Learning Toolbox - Majority Voting Demo
+%%  Ensemble Learning Toolbox - Stacking Demo
 %
 %	A simple stacking ensemble example.
 %
 %--------------------------------------------------------------------------
 %
-%   Version 0.2 - Copyright 2018
+%   Version 0.3 - Copyright 2018
 %
 %       For new releases and bug fixing of this Tool Set please send e-mail
 %       to the authors.
