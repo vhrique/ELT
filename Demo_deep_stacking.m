@@ -1,6 +1,6 @@
-%%  Ensemble Learning Toolbox - Deep Stacking Demo
+%%  Ensemble Learning Toolbox - "Deep" Stacking Demo
 %
-%	A more complex stacking ensemble example.
+%	A two-layer stacking ensemble example.
 %
 %--------------------------------------------------------------------------
 %

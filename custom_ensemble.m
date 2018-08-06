@@ -1,8 +1,8 @@
 classdef custom_ensemble
 %%  Ensemble Learning Toolbox
 %
-%	A simple class/toolbox for creating custom classification ensemble
-%	models.
+%	A simple class/toolbox for creating custom binary classification and
+%	regression ensemble models.
 %
 %--------------------------------------------------------------------------
 %
@@ -58,6 +58,8 @@ classdef custom_ensemble
         
         meta_model = {} % Trained meta (stacking) model
         meta_learner = {} % Metal learner (callback)
+        
+        mode = {}; % Ensemble's mode {regression, classification}
     end
     
     methods
@@ -68,6 +70,13 @@ classdef custom_ensemble
             % Sanity check
             if nargin < 3
                 error('No data')
+            end
+            
+            % Check if classification or regression problem
+            if islogical(Y)
+                obj.mode = 'classification';
+            else
+                obj.mode = 'regression';
             end
             
             % If no features have been defined, use all
@@ -86,13 +95,14 @@ classdef custom_ensemble
             if ~isempty(obj.meta_learner)
                 
                 % Predict for all models
-                y = zeros(size(X, 1), length(obj.models));
+                y = zeros(size(X, 1), length(obj.models)); % Initialize
                 for i = 1 : length(obj.models)
                     y(:,i) = predict(obj.models{i}, X(:, obj.features{i}));
                 end
-                
+                y = y * 1.0; % Convert to float
+                    
                 % Fit stacking model
-                obj.meta_model = obj.meta_learner(y * 1.0, Y);
+                obj.meta_model = obj.meta_learner(y, Y);
             end
         end
         
@@ -105,16 +115,18 @@ classdef custom_ensemble
             end
             
             % Predict for all models
-            y = zeros(size(X, 1), length(obj.models));
+            y = zeros(size(X, 1), length(obj.models)); % Initialize matrix
             for i = 1 : length(obj.models)
                 y(:,i) = predict(obj.models{i}, X(:, obj.features{i}));
             end
+            y = y * 1.0; % Convert to float                
             
             % Combine predictions
             if isempty(obj.meta_model)
-                Y = sum(y, 2) >= size(y, 2)/2;
+                Y = mean(y, 2);
+                if strcmp(obj.mode, 'classification'), Y = Y >= 0.5; end
             else
-                Y = predict(obj.meta_model, 1.0 * y);
+                Y = predict(obj.meta_model, y);
             end
         end
     end
