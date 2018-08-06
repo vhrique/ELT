@@ -51,13 +51,13 @@ classdef custom_ensemble
     
     properties
 
-        models = {} % Trained Models' List
+        models = {} % Trained models' list
         
-        learners = {} % Learners' List (callbacks)
-        features = {} % Features' List
+        learners = {} % Learners' list (callbacks)
+        features = {} % Features' list
         
-        stacking_model = {}
-        stacking_learner = {}
+        meta_model = {} % Trained meta (stacking) model
+        meta_learner = {} % Metal learner (callback)
     end
     
     methods
@@ -82,16 +82,16 @@ classdef custom_ensemble
                 obj.models{i} = obj.learners{i}(X(:,obj.features{i}), Y);
             end
             
-            % Fit stacking model
-            if ~isempty(obj.stacking_learner)
+            % Fit stacking meta model
+            if ~isempty(obj.meta_learner)
                 
                 % Predict for all models
                 for i = 1 : length(obj.models)
-                    y(:,i) = predict(obj.models{i}, X(:,obj.features{i}));
+                    y(:,i) = predict(obj.models{i}, X(:, obj.features{i}));
                 end
                 
                 % Fit stacking model
-                obj.stacking_model = obj.stacking_learner((2*y-1), Y);
+                obj.meta_model = obj.meta_learner(y * 1.0, Y);
             end
         end
         
@@ -105,14 +105,14 @@ classdef custom_ensemble
             
             % Predict for all models
             for i = 1 : length(obj.models)
-                y(:,i) = predict(obj.models{i}, X(:,obj.features{i})) >= 0.5;
+                y(:,i) = predict(obj.models{i}, X(:, obj.features{i}));
             end
             
             % Combine predictions
-            if isempty(obj.stacking_model)
+            if isempty(obj.meta_model)
                 Y = sum(y, 2) >= size(y, 2)/2;
             else
-                Y = predict(obj.stacking_model, (2*y-1));
+                Y = predict(obj.meta_model, 1.0 * y);
             end
         end
     end

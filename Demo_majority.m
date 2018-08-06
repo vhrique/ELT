@@ -52,7 +52,7 @@ tree = @(x, y)fitctree(x, y);
 % Initialize Ensemble
 ens = custom_ensemble;
 ens.learners = {linear_svm, gaussian_svm, knn1, knn3, knn5, tree};
-ens.stacking_learner = {}; % this implies that majority voting is used
+ens.meta_learner = {}; % this implies that majority voting is used
 
 % Train Ensemble
 ens = ens.fit(X_train, Y_train);
