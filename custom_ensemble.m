@@ -27,7 +27,7 @@ classdef custom_ensemble
 %
 %--------------------------------------------------------------------------
 %
-%   Version 0.3 - Copyright 2018
+%   Version 0.X - Copyright 2018
 %
 %       For new releases and bug fixing of this Tool Set please send e-mail
 %       to the authors.
@@ -52,8 +52,8 @@ classdef custom_ensemble
     properties
 
         models = {} % Trained models' list
-        
         learners = {} % Learners' list (callbacks)
+        
         features = {} % Features' list
         
         meta_model = {} % Trained meta (stacking) model
@@ -86,6 +86,7 @@ classdef custom_ensemble
             if ~isempty(obj.meta_learner)
                 
                 % Predict for all models
+                y = zeros(size(X, 1), length(obj.models));
                 for i = 1 : length(obj.models)
                     y(:,i) = predict(obj.models{i}, X(:, obj.features{i}));
                 end
@@ -104,6 +105,7 @@ classdef custom_ensemble
             end
             
             % Predict for all models
+            y = zeros(size(X, 1), length(obj.models));
             for i = 1 : length(obj.models)
                 y(:,i) = predict(obj.models{i}, X(:, obj.features{i}));
             end
