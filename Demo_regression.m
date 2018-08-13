@@ -75,6 +75,14 @@ y_ens = ens.predict(X_test);
 Y_test = Y_test * std_y + mean_y;
 y_ens = y_ens * std_y + mean_y;
 
+% Compute R squared
+R2 = 1 - sum((Y_test - y_ens) .^ 2) / sum((Y_test - mean(Y_test)) .^ 2);
+
+% Print R Squared
+fprintf("---------------------\n");
+fprintf("Ensemble R²: %.3f\n", R2);
+fprintf("---------------------\n");
+
 % Plot result
 plot(Y_test, 'b'); hold on;
 plot(y_ens, 'r'); hold off;

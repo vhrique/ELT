@@ -79,7 +79,7 @@ classdef custom_ensemble
                 obj.mode = 'regression';
             end
             
-            % If no features have been defined, use all
+            % If no features have been defined, use all of them
             if isempty(obj.features)
                 for i = 1 : length(obj.learners)
                     obj.features{i} = 1:size(X, 2);
