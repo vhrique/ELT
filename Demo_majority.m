@@ -29,8 +29,9 @@
 %% Data preparation
 
 % Load and adjust data
-load ionosphere.mat
-Y = strcmp(Y, 'g');
+load fisheriris.mat
+X = meas;
+Y = categorical(species);
 
 % Split train and test data
 [train, test] = dividerand(length(Y), 0.7, 0.3);
@@ -40,8 +41,10 @@ X_test = X(test, :);
 Y_test = Y(test);
 
 % Prepare learners
-linear_svm = @(x, y)fitcsvm(x, y, 'KernelFunction', 'linear');
-gaussian_svm = @(x, y)fitcsvm(x, y, 'KernelFunction', 'gaussian');
+linear = templateSVM('KernelFunction','linear');
+linear_svm = @(x, y)fitcecoc(x, y, 'Learners', linear);
+gaussian = templateSVM('KernelFunction','gaussian');
+gaussian_svm = @(x, y)fitcecoc(x, y, 'Learners', gaussian);
 knn1 = @(x, y)fitcknn(x, y, 'NumNeighbors', 1);
 knn3 = @(x, y)fitcknn(x, y, 'NumNeighbors', 3);
 knn5 = @(x, y)fitcknn(x, y, 'NumNeighbors', 5);
@@ -62,7 +65,7 @@ y_ens = ens.predict(X_test);
 
 % Compute confusion matrix and compute accuracy
 c = confusionmat(Y_test, y_ens);
-acc = (c(1,1) + c(2,2)) / (c(1,1) + c(1,2) + c(2,1) + c(2,2));
+acc = sum(sum(c.*eye(size(c))))/sum(sum(c));
 
 % Print result
 fprintf("---------------------\n");

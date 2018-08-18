@@ -47,11 +47,11 @@ std_x = std(X_train);
 mean_y = mean(Y_train);
 std_y = std(Y_train);
 
-X_train = (X_train - mean_x) / std_x;
-X_test = (X_test - mean_x) / std_x;
+X_train = (X_train - mean_x) ./ std_x;
+X_test = (X_test - mean_x) ./ std_x;
 
-Y_train = (Y_train - mean_y) / std_y;
-Y_test = (Y_test - mean_y) / std_y;
+Y_train = (Y_train - mean_y) ./ std_y;
+Y_test = (Y_test - mean_y) ./ std_y;
 
 % Prepare learners
 linear_svm = @(x, y)fitrsvm(x, y, 'KernelFunction', 'linear');

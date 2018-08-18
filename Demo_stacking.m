@@ -30,7 +30,7 @@
 
 % Load and adjust data
 load ionosphere.mat
-Y = strcmp(Y, 'g');
+Y = categorical(Y);
 
 % Split train and test data
 [train, test] = dividerand(length(Y), 0.7, 0.3);

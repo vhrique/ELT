@@ -1,7 +1,7 @@
 classdef custom_ensemble
 %%  Ensemble Learning Toolbox
 %
-%	A simple class/toolbox for creating custom binary classification and
+%	A simple class/toolbox for creating custom classification and
 %	regression ensemble models.
 %
 %--------------------------------------------------------------------------
@@ -53,13 +53,13 @@ classdef custom_ensemble
 
         models = {} % Trained models' list
         learners = {} % Learners' list (callbacks)
-        
         features = {} % Features' list
         
         meta_model = {} % Trained meta (stacking) model
         meta_learner = {} % Metal learner (callback)
         
-        mode = {}; % Ensemble's mode {regression, classification}
+        mode = {}; % Ensemble's mode {classification, regression}
+        classes = {}; % Problem's classes
     end
     
     methods
@@ -67,16 +67,13 @@ classdef custom_ensemble
         % Fit ensemble
         function obj = fit(obj, X, Y)
             
-            % Sanity check
-            if nargin < 3
-                error('No data')
-            end
-            
             % Check if classification or regression problem
-            if islogical(Y)
+            if iscategorical(Y)
                 obj.mode = 'classification';
+                obj.classes = unique(Y)';
             else
                 obj.mode = 'regression';
+                obj.classes = {'num'};
             end
             
             % If no features have been defined, use all of them
@@ -94,12 +91,31 @@ classdef custom_ensemble
             % Fit stacking meta model
             if ~isempty(obj.meta_learner)
                 
-                % Predict for all models
-                y = zeros(size(X, 1), length(obj.models)); % Initialize
-                for i = 1 : length(obj.models)
-                    y(:,i) = predict(obj.models{i}, X(:, obj.features{i}));
+                % Check number of classes, models and outputs
+                n_classes = length(obj.classes);
+                n_models = length(obj.models);
+                n_outputs = length(Y);
+                
+                % Initialize classes matrix
+                class_matrix = repmat(obj.classes, n_outputs, 1);
+                
+                % Initialize output array
+                y = zeros(n_outputs, n_classes * n_models);
+                
+                % For each model
+                for i = 1 : n_models
+                    
+                    % Predict
+                    y_aux = predict(obj.models{i}, X(:, obj.features{i}));
+                    
+                    % If classification task, adjust outputs
+                    if strcmp(obj.mode, 'classification')                        
+                        y(:, n_classes*(i-1)+1 : n_classes*i) = 1.0 * ...
+                            (repmat(y_aux, 1, n_classes) == class_matrix);
+                    else
+                        y(:,i) = y_aux;
+                    end
                 end
-                y = y * 1.0; % Convert to float
                     
                 % Fit stacking model
                 obj.meta_model = obj.meta_learner(y, Y);
@@ -108,28 +124,52 @@ classdef custom_ensemble
         
         % Predict new data
         function Y = predict(obj, X)
+                
+            % Check number of classes, models and outputs
+            n_classes = length(obj.classes);
+            n_models = length(obj.models);
+            n_outputs = size(X, 1);
             
-            % Sanity check
-            if nargin < 2
-                error('No data')
-            end
-            
-            % Predict for all models
-            y = zeros(size(X, 1), length(obj.models)); % Initialize matrix
-            for i = 1 : length(obj.models)
-                y(:,i) = predict(obj.models{i}, X(:, obj.features{i}));
-            end
-            y = y * 1.0; % Convert to float                
+            % Initialize classes matrix
+            class_matrix = repmat(obj.classes, n_outputs, 1)';
+
+            % Initialize output array
+            y = zeros(n_outputs, n_classes * n_models);
+                
+            % For each model
+            for i = 1 : n_models
+
+                % Predict
+                y_aux = predict(obj.models{i}, X(:, obj.features{i}));
+
+                % If classification task, adjust outputs
+                if strcmp(obj.mode, 'classification')                        
+                    y(:, n_classes*(i-1)+1 : n_classes*i) = 1.0 * ...
+                        (repmat(y_aux, 1, n_classes) == class_matrix');
+                else
+                    y(:,i) = y_aux;
+                end
+            end             
             
             % Combine predictions
             if isempty(obj.meta_model)
-                Y = mean(y, 2);
-                if strcmp(obj.mode, 'classification'), Y = Y >= 0.5; end
+                
+                % Initialize output
+                Y = zeros(n_outputs, n_classes);
+                
+                % Sum prediction occurrences
+                for i = 1 : n_models
+                    Y = Y + y(:, n_classes*(i-1)+1:n_classes*i);
+                end
+                
+                % Vote
+                [~, idx] = max(Y, [], 2);
+                Y = class_matrix(idx);                
             else
+                % Stacking
                 Y = predict(obj.meta_model, y);
             end
         end
     end
-    
 end
 
