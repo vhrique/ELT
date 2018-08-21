@@ -154,17 +154,21 @@ classdef custom_ensemble
             % Combine predictions
             if isempty(obj.meta_model)
                 
-                % Initialize output
-                Y = zeros(n_outputs, n_classes);
-                
-                % Sum prediction occurrences
-                for i = 1 : n_models
-                    Y = Y + y(:, n_classes*(i-1)+1:n_classes*i);
+                if strcmp(obj.mode, 'classification')
+                    % Initialize output
+                    Y = zeros(n_outputs, n_classes);
+
+                    % Sum prediction occurrences
+                    for i = 1 : n_models
+                        Y = Y + y(:, n_classes*(i-1)+1:n_classes*i);
+                    end
+
+                    % Vote
+                    [~, idx] = max(Y, [], 2);
+                    Y = class_matrix(idx);
+                else
+                    Y = mean(y, 2);
                 end
-                
-                % Vote
-                [~, idx] = max(Y, [], 2);
-                Y = class_matrix(idx);                
             else
                 % Stacking
                 Y = predict(obj.meta_model, y);

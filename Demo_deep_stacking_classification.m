@@ -1,6 +1,6 @@
-%%  Ensemble Learning Toolbox - Stacking Demo
+%%  Ensemble Learning Toolbox - "Deep" Stacking Demo
 %
-%	A simple stacking ensemble example.
+%	A two-layer stacking ensemble example.
 %
 %--------------------------------------------------------------------------
 %
@@ -49,12 +49,28 @@ tree = @(x, y)fitctree(x, y);
 
 %% Ensemble
 
-% Initialize Ensemble
-ens = custom_ensemble;
-ens.learners = {linear_svm, gaussian_svm, knn1, knn3, knn5, tree};
-ens.meta_learner = linear_svm; % this implies that stacking is used
+% Initialize first layer ensembles
+ens1 = custom_ensemble;
+ens1.learners = {linear_svm, knn1, knn5};
+ens1.meta_learner = {}; % this implies that majority voting is used
+ensl_1 = @(x, y)fit(ens1, x, y); % create learner
 
-% Train Ensemble
+ens2 = custom_ensemble;
+ens2.learners = {gaussian_svm, knn3, tree};
+ens2.meta_learner = linear_svm; % this implies that stacking is used
+ensl_2 = @(x, y)fit(ens2, x, y); % create learner
+
+ens3 = custom_ensemble;
+ens3.learners = {linear_svm, knn1, tree};
+ens3.meta_learner = {}; % this implies that majority voting is used
+ensl_3 = @(x, y)fit(ens3, x, y); % create learner
+
+% Initialize second layer ensemble
+ens = custom_ensemble;
+ens.learners = {ensl_1, ensl_2, ensl_3};
+ens.meta_learner = gaussian_svm; % this implies that stacking is used
+
+% Train ensemble
 ens = ens.fit(X_train, Y_train);
 
 % Predict
@@ -62,7 +78,7 @@ y_ens = ens.predict(X_test);
 
 % Compute confusion matrix and compute accuracy
 c = confusionmat(Y_test, y_ens);
-acc = (c(1,1) + c(2,2)) / (c(1,1) + c(1,2) + c(2,1) + c(2,2));
+acc = sum(sum(c.*eye(size(c))))/sum(sum(c));
 
 % Print result
 fprintf("---------------------\n");
