@@ -1,1 +1,0 @@
-[![View Ensemble Learning Toolbox on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/68383-ensemble-learning-toolbox)
