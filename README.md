@@ -43,9 +43,10 @@ Please contact the author (victor.henrique@pucpr.edu.br).
 ## Versioning
 
 We use a three codes versioning system: vA.B.C.
-A stands for the major revision, and will be used when a major new feature is added or compatibility to previous major revision is lost.
-B stands for minor revision, where new features will be added.
-C is used for fixing bugs in the code.
+
+* A stands for the major revision, and will be used when a major new feature is added or compatibility to previous major revision is lost.
+* B stands for minor revision, where new features will be added.
+* C is used for fixing bugs in the code.
 
 ## Authors
 
